@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "a3af4ab7cd06c7696abb0afbc9c8b7b370c93a8a32b1570fb66acd9c522cf34e",
-      "bytes": 5416
+      "sha256": "d584fa826ba5ab88685f7bd92c510a62821ac3ae28f373f9e1b478bf37f13577",
+      "bytes": 6059
     },
     {
       "path": "apps/bulletin-editor/LICENSE",
@@ -49,8 +49,8 @@
     },
     {
       "path": "apps/bulletin-editor/annual_roster.py",
-      "sha256": "abbfb3d198902ccb49c83e3d83da72254708c152b6936d925a8e717e13acb38a",
-      "bytes": 7518
+      "sha256": "7259164bfd72180d147c07d9a10b53408f8f5dde80e706fa2a9038fec22a1b0f",
+      "bytes": 11715
     },
     {
       "path": "apps/bulletin-editor/catalog.py",
@@ -109,8 +109,8 @@
     },
     {
       "path": "apps/bulletin-editor/server.py",
-      "sha256": "8bde7ce636d4c0f63e51c5c2eee7f02d9f375d30bc5cb56fca82f3bf96ff9c60",
-      "bytes": 26652
+      "sha256": "04ce27d575d288362a67613f94d8e9811a38bfb5198e6f3a7b7664aec778a174",
+      "bytes": 27354
     },
     {
       "path": "apps/bulletin-editor/siwc.py",
@@ -149,8 +149,8 @@
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "8dfcfab22c99fd57c165109b78a96a00e5b1fdf835be2e5a5e8647f8fb4515d4",
-      "bytes": 47740
+      "sha256": "0c95ffcdf22889ddc168206e3974e772e1a7ec0ae735907f73d3bde8a72781ab",
+      "bytes": 48554
     },
     {
       "path": "apps/bulletin-editor/weekly.py",

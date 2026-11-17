@@ -234,8 +234,10 @@ class Handler(SimpleHTTPRequestHandler):
                     from hymn_metadata import PATH
                     return self.reply(PATH.read_bytes(),'text/csv; charset=utf-8')
                 if path=='/api/weekly/roster-template':
-                    from annual_roster import ROOT
-                    template=ROOT/'outputs'/'01a191de-edfe-7372-8b9a-726cb03c4170'/'2027_연간봉사대장.xlsx'
+                    from annual_roster import TEMPLATES
+                    year=parse_qs(urlparse(self.path).query).get('year',['2027'])[0]
+                    if year not in ('2026','2027'):raise ValueError('준비된 연도는 2026년·2027년입니다.')
+                    template=TEMPLATES/(year+'_연간봉사대장.xlsx')
                     if not template.exists():raise ValueError('연간 봉사 대장 양식 파일이 없습니다.')
                     return self.reply(template.read_bytes(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 if path.startswith('/api/weekly/background/'):
@@ -283,9 +285,21 @@ class Handler(SimpleHTTPRequestHandler):
                 elif action=='validate':weekly.validate(doc['document']);result={'valid':True}
                 elif action=='save':result=weekly.save_current(doc['document'])
                 elif action=='archive':result=weekly.archive(doc['document'])
-                elif action=='next':result=weekly.preview(weekly.next_week(doc['document']))
-                elif action=='update':weekly.validate(doc['document']);result=weekly.preview(update_document(doc['document'],doc['changes']))
-                elif action=='edit':weekly.validate(doc['document']);result=weekly.preview(edit_block(doc['document'],doc['id'],doc['text']))
+                elif action=='next':
+                    from annual_roster import apply
+                    result=weekly.preview(apply(weekly.next_week(doc['document'])))
+                elif action=='update':
+                    weekly.validate(doc['document']);result=update_document(doc['document'],doc['changes'])
+                    if 'date' in doc['changes']:
+                        from annual_roster import apply
+                        result=apply(result)
+                    result=weekly.preview(result)
+                elif action=='edit':
+                    weekly.validate(doc['document']);result=edit_block(doc['document'],doc['id'],doc['text'])
+                    if result['serviceData']['date']!=doc['document']['serviceData']['date']:
+                        from annual_roster import apply
+                        result=apply(result)
+                    result=weekly.preview(result)
                 elif action=='scripture-preview':
                     from catalog import preview
                     result=preview(doc)
