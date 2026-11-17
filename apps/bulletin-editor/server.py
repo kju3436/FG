@@ -287,18 +287,23 @@ class Handler(SimpleHTTPRequestHandler):
                 elif action=='archive':result=weekly.archive(doc['document'])
                 elif action=='next':
                     from annual_roster import apply
-                    result=weekly.preview(apply(weekly.next_week(doc['document'])))
+                    from communion import automatic
+                    result=weekly.preview(automatic(apply(weekly.next_week(doc['document']))))
                 elif action=='update':
                     weekly.validate(doc['document']);result=update_document(doc['document'],doc['changes'])
                     if 'date' in doc['changes']:
                         from annual_roster import apply
                         result=apply(result)
+                        from communion import automatic
+                        result=automatic(result)
                     result=weekly.preview(result)
                 elif action=='edit':
                     weekly.validate(doc['document']);result=edit_block(doc['document'],doc['id'],doc['text'])
                     if result['serviceData']['date']!=doc['document']['serviceData']['date']:
                         from annual_roster import apply
                         result=apply(result)
+                        from communion import automatic
+                        result=automatic(result)
                     result=weekly.preview(result)
                 elif action=='scripture-preview':
                     from catalog import preview
@@ -306,6 +311,10 @@ class Handler(SimpleHTTPRequestHandler):
                 elif action=='translate-title':
                     from title_translation import translate
                     result=translate(doc)
+                elif action=='communion':
+                    import communion
+                    weekly.validate(doc['document'])
+                    result=weekly.preview(communion.automatic(doc['document']) if doc.get('mode')=='auto' else communion.apply(doc['document'],doc.get('enabled')))
                 elif action=='roster-import':
                     from annual_roster import import_records
                     result=import_records(doc)

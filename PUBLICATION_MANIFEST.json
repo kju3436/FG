@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "d584fa826ba5ab88685f7bd92c510a62821ac3ae28f373f9e1b478bf37f13577",
-      "bytes": 6059
+      "sha256": "0f22064d0db93792e238eab01005c3373a6d083a45a2384645fc42e303aabfd9",
+      "bytes": 6584
     },
     {
       "path": "apps/bulletin-editor/LICENSE",
@@ -61,6 +61,11 @@
       "path": "apps/bulletin-editor/chatgpt_eligibility.py",
       "sha256": "fbc88c04258e6ff35239bd4f322021d76affc1363e7401c26a179733d0a2efe7",
       "bytes": 810
+    },
+    {
+      "path": "apps/bulletin-editor/communion.py",
+      "sha256": "92e21e319eb148e5d446e3108cb64e57c9b7f6a3470025073bda642973ccceb0",
+      "bytes": 5126
     },
     {
       "path": "apps/bulletin-editor/compose.py",
@@ -109,8 +114,8 @@
     },
     {
       "path": "apps/bulletin-editor/server.py",
-      "sha256": "04ce27d575d288362a67613f94d8e9811a38bfb5198e6f3a7b7664aec778a174",
-      "bytes": 27354
+      "sha256": "044bfa3aab6ccd3c183b3a9cf1676803e33a03692ec1c30eb4f62d8064cae80c",
+      "bytes": 27923
     },
     {
       "path": "apps/bulletin-editor/siwc.py",
@@ -134,23 +139,23 @@
     },
     {
       "path": "apps/bulletin-editor/web/index.html",
-      "sha256": "391b4eac65f3e3fc96d2d6a4e859ac47d5a319243aacbaefddbced1a8f1d6bd5",
-      "bytes": 17761
+      "sha256": "911bc17f6844bea7db98c43905afbb41b37a0a7a5f9d5964b12392921e962e93",
+      "bytes": 18056
     },
     {
       "path": "apps/bulletin-editor/web/weekly.css",
-      "sha256": "4f3233afb9898bc15f8771059e6287afb3fc542b681b33e4a8e4ed26a9e11b6d",
-      "bytes": 18186
+      "sha256": "0e4a1fb581045bd588dc119ba74f5984e69c942b29edfd654feb7d4735bbe4a3",
+      "bytes": 18662
     },
     {
       "path": "apps/bulletin-editor/web/weekly.html",
-      "sha256": "391b4eac65f3e3fc96d2d6a4e859ac47d5a319243aacbaefddbced1a8f1d6bd5",
-      "bytes": 17761
+      "sha256": "911bc17f6844bea7db98c43905afbb41b37a0a7a5f9d5964b12392921e962e93",
+      "bytes": 18056
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "05765c723ff0b1db080b2c9a1480be691221af0c9dc61b029dac4cc8de15617c",
-      "bytes": 50610
+      "sha256": "ec55798d52dfd25d7a0cd984912416ffa02e3302bcbf99adecf0ecf40ed9678d",
+      "bytes": 52023
     },
     {
       "path": "apps/bulletin-editor/weekly.py",
@@ -159,8 +164,8 @@
     },
     {
       "path": "apps/bulletin-editor/worship.py",
-      "sha256": "1da53eb316e9d10892828365ab3202756ac9266d010c6e89424f00a64a5a1367",
-      "bytes": 50036
+      "sha256": "99bef9ce3bbebc280b289f3c025e168674aae913c40a5b6e4ef6d0f67513b0e2",
+      "bytes": 50282
     },
     {
       "path": "system/scripture-official-sources.json",

@@ -236,6 +236,8 @@ def _auto_prepare(document):
     """Discover standard boundaries in the actual latest deck, never stale positions."""
     data = copy.deepcopy(document.get('serviceData'))
     _require(isinstance(data, dict), '주보의 예배 정보를 먼저 입력해주세요.')
+    _require(not data.get('communion',{}).get('enabled'),
+             '성찬식이 선택되어 있습니다. 성찬식 PPT 구간을 승인 자료에서 연결한 후 제작해주세요. 성찬식을 생략한 PPT는 만들지 않습니다.')
     try:
         datetime.date.fromisoformat(data.get('date', ''))
     except (ValueError, TypeError) as exc:
