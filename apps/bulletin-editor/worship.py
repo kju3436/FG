@@ -236,8 +236,6 @@ def _auto_prepare(document):
     """Discover standard boundaries in the actual latest deck, never stale positions."""
     data = copy.deepcopy(document.get('serviceData'))
     _require(isinstance(data, dict), '주보의 예배 정보를 먼저 입력해주세요.')
-    _require(not data.get('communion',{}).get('enabled'),
-             '성찬식이 선택되어 있습니다. 성찬식 PPT 구간을 승인 자료에서 연결한 후 제작해주세요. 성찬식을 생략한 PPT는 만들지 않습니다.')
     try:
         datetime.date.fromisoformat(data.get('date', ''))
     except (ValueError, TypeError) as exc:
@@ -313,8 +311,8 @@ def _auto_prepare(document):
             cache[str(path)] = _Deck(path)
         return cache[str(path)]
 
-    def song(label, optional=False):
-        r = row(label, not optional)
+    def song(label, optional=False, selection=None):
+        r = row(label, not optional) if selection is None else selection
         detail = str(r.get('detailKo') or '').strip()
         ja = str(r.get('detailJa') or '').strip()
         if not detail and not ja and optional:
@@ -330,9 +328,33 @@ def _auto_prepare(document):
         _require(candidates, f'{label}: 승인 라이브러리에 「{detail or ja}」가 없습니다. 승인된 곡을 선택해주세요.')
         candidates.sort(key=lambda x: (x.get('preferred') is True, '(수정)' in x['file'], x.get('modifiedUtc', ''), x['file']), reverse=True)
         source = asset(candidates[0]['file'])
+        first_output=len(sequence)+1
         for n in range(1, len(source.slides) + 1):
             emit(source, n)
-        sections.append({'name': label, 'action': 'reuse', 'source': candidates[0]['file'], 'slideCount': len(source.slides)})
+        sections.append({'name': label, 'action': 'reuse', 'source': candidates[0]['file'], 'slideCount': len(source.slides), 'firstSlide':first_output, 'lastSlide':len(sequence)})
+
+    def communion_section():
+        settings=data.get('communion',{})
+        if not settings.get('enabled'):return
+        numbers=re.findall(r'韓日\s*(\d{1,3})\s*章',str(settings.get('detailRaw','')))
+        _require(len(numbers)==1,'성찬식 찬송가의 한일 번호를 하나 입력해주세요. 예: 韓日285章')
+        found=None
+        for candidate in sorted(index.get('finalDecks',[]),key=lambda v:(v.get('modifiedUtc',''),v.get('file','')),reverse=True):
+            source=asset(candidate['file']);matches=[]
+            for i,name in enumerate(source.slides,1):
+                texts={norm(t.text or '') for t in _xml(source.parts[name]).iter(f'{{{A}}}t')}
+                if '성찬식' in texts and '聖餐式' in texts:matches.append(i)
+            if matches:
+                _require(len(matches)==1,'승인된 성찬식 PPT에 표지가 여러 개 있습니다. 재사용할 구간 확인이 필요합니다.')
+                start=matches[0]
+                # Only a generic title is safe to reuse automatically here.
+                visible={norm(t.text or '') for t in _xml(source.parts[source.slides[start-1]]).iter(f'{{{A}}}t') if norm(t.text or '')}
+                _require(visible=={'성찬식','聖餐式'},'성찬식 표지에 별도 문구가 있어 재사용 확인이 필요합니다.')
+                found=(source,start,candidate['file']);break
+        _require(found,'승인된 예배 PPT에서 성찬식 표지를 찾지 못했습니다. 성찬식 PPT를 라이브러리에 등록해주세요.')
+        source,start,relative=found;first_output=len(sequence)+1;emit(source,start)
+        sections.append({'name':'성찬식','action':'reuse','source':relative,'sourceFirstSlide':start,'sourceLastSlide':start,'slideCount':1,'firstSlide':first_output,'lastSlide':len(sequence)})
+        song('성찬 찬송',selection={'detailKo':'한일찬송가 '+str(int(numbers[0]))+'장','detailJa':'韓日'+str(int(numbers[0]))+'章'})
 
     def template(kind):
         filename = '사죄확인_템플릿.pptx' if kind == 'absolution' else '설교본문_템플릿.pptx'
@@ -436,6 +458,7 @@ def _auto_prepare(document):
     template('sermon')
     warnings.append('말씀 상단의 한일 성경 표기는 공백을 줄여 표시합니다. 원래 글꼴·상자에서 넘치면 제작을 중단합니다.')
     song('찬양', optional=True)
+    communion_section()
     warnings.append('지난주 찬양대 자막·제직임명 등 특별순서는 자동으로 재사용하지 않았습니다.')
     keep(b['봉헌을위한기도'], b['봉헌'])
     song('봉헌')
@@ -728,7 +751,7 @@ try {
   $p=$app.Presentations.Open($Deck,-1,0,0)
   if($p.Slides.Count -ne $Count){throw 'Slide count mismatch'}
   $rows=@($job.rows)
-  @($rows | Select-Object -ExpandProperty slide -Unique | Select-Object -First 12) | ForEach-Object {
+  @(@($job.representatives)+@($rows | Select-Object -ExpandProperty slide -Unique) | Select-Object -Unique | Select-Object -First 12) | ForEach-Object {
     Stage ('Export representative slide '+$_)
     $p.Slides.Item([int]$_).Export((Join-Path $ReviewDir ('sample-'+$_+'.png')),'PNG',1280,720)
   }
@@ -789,7 +812,11 @@ def build_worship(document: dict) -> bytes:
                 insertions[-1]['last'] = n
             else:
                 insertions.append({'path': str(path), 'first': n, 'last': n})
-        (work / 'checks.json').write_text(json.dumps({'rows': checks, 'insertions': insertions}, ensure_ascii=False), encoding='utf-8-sig')
+        representatives=[]
+        for section in plan.get('sections',[]):
+            if section.get('name') in ('성찬식','성찬 찬송'):
+                representatives.extend([section['firstSlide'],section['lastSlide']])
+        (work / 'checks.json').write_text(json.dumps({'rows': checks, 'insertions': insertions,'representatives':list(dict.fromkeys(representatives))}, ensure_ascii=False), encoding='utf-8-sig')
         (work / 'verify.ps1').write_text(_VERIFY, encoding='utf-8-sig')
         try:
             run = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File',

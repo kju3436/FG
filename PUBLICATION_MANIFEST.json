@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "0f22064d0db93792e238eab01005c3373a6d083a45a2384645fc42e303aabfd9",
-      "bytes": 6584
+      "sha256": "5063204c98185bf2738bf93263b089c653e80813e6f9d9f14b19c46365d8cce6",
+      "bytes": 6821
     },
     {
       "path": "apps/bulletin-editor/LICENSE",
@@ -154,8 +154,8 @@
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "ec55798d52dfd25d7a0cd984912416ffa02e3302bcbf99adecf0ecf40ed9678d",
-      "bytes": 52023
+      "sha256": "f3aaadaaaa100f5b0e80042b7ee41e2224b0153349de7e2a01e1b396d3482472",
+      "bytes": 52296
     },
     {
       "path": "apps/bulletin-editor/weekly.py",
@@ -164,8 +164,8 @@
     },
     {
       "path": "apps/bulletin-editor/worship.py",
-      "sha256": "99bef9ce3bbebc280b289f3c025e168674aae913c40a5b6e4ef6d0f67513b0e2",
-      "bytes": 50282
+      "sha256": "9b13e2dcb1b1ea4427ac45fb353fdf45f5d9116a35fa9b161f685b366e095702",
+      "bytes": 52511
     },
     {
       "path": "system/scripture-official-sources.json",
