@@ -147,11 +147,15 @@ def page_chars():
     device.close();return pages
 
 @lru_cache(maxsize=1)
-def backgrounds():
-    import pypdfium2
+def graphics_pdf():
     from pypdf import PdfReader,PdfWriter
     w=PdfWriter();w.append(PdfReader(source()));w.remove_text();buf=io.BytesIO();w.write(buf)
-    pdf=pypdfium2.PdfDocument(buf.getvalue());images=[]
+    return buf.getvalue()
+
+@lru_cache(maxsize=1)
+def backgrounds():
+    import pypdfium2
+    pdf=pypdfium2.PdfDocument(graphics_pdf());images=[]
     for page in pdf:
         bitmap=page.render(scale=2);data=io.BytesIO();bitmap.to_pil().save(data,format='PNG');images.append('data:image/png;base64,'+base64.b64encode(data.getvalue()).decode());bitmap.close();page.close()
     pdf.close();return images
@@ -189,7 +193,7 @@ def _template():
                 # Reference headings get the whole measured title column, not a tight text bbox.
                 box=(300,0,594,31) if pi==2 and 'コロサイ人' in text else (300,214,594,256) if pi==2 and 'マタイ' in text else None
                 b=make_block(part,ident,'nativeText.'+ident,['cover','service','scripture','notices'][pi],box);data['nativeText'][ident]=b['text'];blocks.append(b)
-        pages.append(dict(name=base['pages'][pi]['name'],blocks=blocks,backgroundData=backgrounds()[pi]))
+        pages.append(dict(name=base['pages'][pi]['name'],blocks=blocks,backgroundData=backgrounds()[pi],referenceBackground=PROFILE))
     doc.update(pages=pages,fonts=base['fonts']+copy.deepcopy(fonts_cached()),layoutProfile=PROFILE,printLayoutVersion=3,communionLayoutVersion=3,title='2026-11-01 성찬식 주보 기준 배치',communionNormalPage=copy.deepcopy(base['pages'][1]))
     for f in doc['fonts']:
         if f.get('backend')=='reference-subset':

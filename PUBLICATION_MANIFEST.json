@@ -89,8 +89,8 @@
     },
     {
       "path": "apps/bulletin-editor/native_template.py",
-      "sha256": "c76c846dcb596055cdcb92ecfded1671a292a4d6fa7dedae6ef8eb555d621a3d",
-      "bytes": 58543
+      "sha256": "7452927bfd5b4f104e768e1ce7c6b13fa3377b672b4f3e4cae3b11d7b9f7c4a2",
+      "bytes": 59074
     },
     {
       "path": "apps/bulletin-editor/partial.py",
@@ -99,8 +99,8 @@
     },
     {
       "path": "apps/bulletin-editor/print_profile.py",
-      "sha256": "931b16c463df0b0197fef5735774f1d95013628a3fcd72068982e64557663a30",
-      "bytes": 17897
+      "sha256": "ab426665ce247b5a1df35dff7dc2f5a412502e271c60bc100d0f5fc28aebf00c",
+      "bytes": 17994
     },
     {
       "path": "apps/bulletin-editor/reflow.py",

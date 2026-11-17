@@ -182,8 +182,9 @@ def _draw(c,entry,text,x,y,size,color):
         provider.draw_text(c,entry,text,x,y,size,color)
     else:
         font=_register(entry);c.setFont(font.fontName,size);c.setFillColor(HexColor(color))
-        if entry.get('syntheticBold'):
-            c.saveState();c.setStrokeColor(HexColor(color));c.setLineWidth(size*.018)
+        source_stroke=entry.get('sourceStrokeWidth',0) if entry.get('sourceRenderMode') in (1,2) else 0
+        if entry.get('syntheticBold') or source_stroke:
+            c.saveState();c.setStrokeColor(HexColor(color));c.setLineWidth(source_stroke or size*.018)
             obj=c.beginText(x,y);obj.setTextRenderMode(2);obj.textOut(text);c.drawText(obj);c.restoreState()
         else:c.drawString(x,y,text)
 
@@ -1099,11 +1100,18 @@ def render_document(doc, mode='booklet'):
     if missing:
         raise ValueError('Original fonts unavailable (no fallback): ' + ', '.join(missing))
     writer = PdfWriter()
+    reference_graphics=None
+    if doc.get('layoutProfile')=='communion-20261101-v3':
+        from print_profile import graphics_pdf
+        reference_graphics=PdfReader(io.BytesIO(graphics_pdf()))
     for i, page in enumerate(doc['pages']):
-        mem = io.BytesIO(); c = canvas.Canvas(mem, pagesize=(W, H))
-        background=base64.b64decode(page['backgroundData'].split(',',1)[1]) if page.get('backgroundData') else background_bytes(i)
-        c.drawImage(ImageReader(io.BytesIO(background)), 0, 0, W, H); c.save()
-        out = writer.add_page(PdfReader(io.BytesIO(mem.getvalue())).pages[0])
+        if reference_graphics is not None and page.get('referenceBackground')=='communion-20261101-v3':
+            out=writer.add_page(reference_graphics.pages[i])
+        else:
+            mem = io.BytesIO(); c = canvas.Canvas(mem, pagesize=(W, H))
+            background=base64.b64decode(page['backgroundData'].split(',',1)[1]) if page.get('backgroundData') else background_bytes(i)
+            c.drawImage(ImageReader(io.BytesIO(background)), 0, 0, W, H); c.save()
+            out = writer.add_page(PdfReader(io.BytesIO(mem.getvalue())).pages[0])
         for block in page['blocks']:
             out.merge_page(native_text_layer(block, registry))
     if mode in ('logical', 'original'):
