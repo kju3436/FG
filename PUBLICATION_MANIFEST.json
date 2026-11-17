@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "d2bbef427770564e782016f7d8f9f48bdc01f1cc3503efee7066ab90ec034661",
-      "bytes": 4898
+      "sha256": "a3af4ab7cd06c7696abb0afbc9c8b7b370c93a8a32b1570fb66acd9c522cf34e",
+      "bytes": 5416
     },
     {
       "path": "apps/bulletin-editor/LICENSE",
@@ -48,9 +48,14 @@
       "bytes": 11870
     },
     {
+      "path": "apps/bulletin-editor/annual_roster.py",
+      "sha256": "abbfb3d198902ccb49c83e3d83da72254708c152b6936d925a8e717e13acb38a",
+      "bytes": 7518
+    },
+    {
       "path": "apps/bulletin-editor/catalog.py",
-      "sha256": "5a07f068df0ab6290cb43f70b483ebbad6d23d89605a3324ce66db8d469eacc4",
-      "bytes": 7336
+      "sha256": "60ed1267a320b5c69dcc5e14e5f090e8c61815e0e894b28e9640134887b313c2",
+      "bytes": 7449
     },
     {
       "path": "apps/bulletin-editor/chatgpt_eligibility.py",
@@ -68,14 +73,19 @@
       "bytes": 14071
     },
     {
+      "path": "apps/bulletin-editor/hymn_metadata.py",
+      "sha256": "73cbe3b06d40ee7e7d7e774aec5eb94f1c77beafca700e2f1c361d1f40a8567c",
+      "bytes": 1581
+    },
+    {
       "path": "apps/bulletin-editor/import_scripture.py",
       "sha256": "d64666576f1b1b8cbe48b6f10285dccfb59b033c60480152d42f84d7c808801a",
       "bytes": 2781
     },
     {
       "path": "apps/bulletin-editor/native_template.py",
-      "sha256": "572690640efdcd521a654ffc27dfef6ef7efe5678d3b63f2b65f00cecf2482e5",
-      "bytes": 52350
+      "sha256": "350b0683c522a78b1ed8ee01ad5b46b9d0fea30bf2e434a684d2e3cdc126c998",
+      "bytes": 52385
     },
     {
       "path": "apps/bulletin-editor/partial.py",
@@ -99,8 +109,8 @@
     },
     {
       "path": "apps/bulletin-editor/server.py",
-      "sha256": "ff6eaac9b1c1e1537ae1a1bc00e7a4ca8e0769d38125afc5adbf5cd0c1b559fa",
-      "bytes": 25302
+      "sha256": "8bde7ce636d4c0f63e51c5c2eee7f02d9f375d30bc5cb56fca82f3bf96ff9c60",
+      "bytes": 26652
     },
     {
       "path": "apps/bulletin-editor/siwc.py",
@@ -118,24 +128,29 @@
       "bytes": 8311
     },
     {
+      "path": "apps/bulletin-editor/title_translation.py",
+      "sha256": "0cb567c3eb07355db1d39648e4773cbfb7b53be1fa79553326f94c703616fcbb",
+      "bytes": 1491
+    },
+    {
       "path": "apps/bulletin-editor/web/index.html",
-      "sha256": "51fa61bd63cf460fec721fcbef719b3285ae1e3e1bfb406203f35a4407667609",
-      "bytes": 17264
+      "sha256": "673637417e6522dae63fcdffc9abd56f172a12f386ca245e554cda1640a8b1f2",
+      "bytes": 17721
     },
     {
       "path": "apps/bulletin-editor/web/weekly.css",
-      "sha256": "0cb6e0f15c50746bf83cc5573718179608496cbbfd0f5690adb0f3dc67b36ee3",
-      "bytes": 16799
+      "sha256": "4f3233afb9898bc15f8771059e6287afb3fc542b681b33e4a8e4ed26a9e11b6d",
+      "bytes": 18186
     },
     {
       "path": "apps/bulletin-editor/web/weekly.html",
-      "sha256": "51fa61bd63cf460fec721fcbef719b3285ae1e3e1bfb406203f35a4407667609",
-      "bytes": 17264
+      "sha256": "673637417e6522dae63fcdffc9abd56f172a12f386ca245e554cda1640a8b1f2",
+      "bytes": 17721
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "0c441614a2f1fac4e2d858cb434477728421b67b5a0fb05a857fd0cf78fc7ff1",
-      "bytes": 42791
+      "sha256": "8dfcfab22c99fd57c165109b78a96a00e5b1fdf835be2e5a5e8647f8fb4515d4",
+      "bytes": 47740
     },
     {
       "path": "apps/bulletin-editor/weekly.py",

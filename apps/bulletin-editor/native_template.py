@@ -577,7 +577,7 @@ def _canonical_fields(data, pages):
         row.pop('hymnReferences',None)
         if number:
             refs={'hanil':number[1]}
-            for key,pattern in [('japanese',r'(?:讃美歌|賛美歌第II編|聖歌)\s*(\d+)'),('newKorean',r'새\s*(\d+)')]:
+            for key,pattern in [('japanese',r'(?:教会[讃賛]美歌|[讃賛]美歌(?:第?(?:II|二)編)?|聖歌)\s*(\d+[ab]?)'),('newKorean',r'새\s*(\d+)')]:
                 m=re.search(pattern,raw)
                 if m:refs[key]=m[1]
             row['hymnReferences']=refs

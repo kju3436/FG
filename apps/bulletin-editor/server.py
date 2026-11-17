@@ -230,6 +230,14 @@ class Handler(SimpleHTTPRequestHandler):
                 if path=='/api/weekly/catalog':
                     from catalog import catalog
                     return self.reply(json.dumps(catalog(),ensure_ascii=False).encode())
+                if path=='/api/weekly/hymn-metadata':
+                    from hymn_metadata import PATH
+                    return self.reply(PATH.read_bytes(),'text/csv; charset=utf-8')
+                if path=='/api/weekly/roster-template':
+                    from annual_roster import ROOT
+                    template=ROOT/'outputs'/'01a191de-edfe-7372-8b9a-726cb03c4170'/'2027_연간봉사대장.xlsx'
+                    if not template.exists():raise ValueError('연간 봉사 대장 양식 파일이 없습니다.')
+                    return self.reply(template.read_bytes(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 if path.startswith('/api/weekly/background/'):
                     from native_template import background_bytes
                     return self.reply(background_bytes(int(path.rsplit('/',1)[-1])),'image/png')
@@ -281,6 +289,19 @@ class Handler(SimpleHTTPRequestHandler):
                 elif action=='scripture-preview':
                     from catalog import preview
                     result=preview(doc)
+                elif action=='translate-title':
+                    from title_translation import translate
+                    result=translate(doc)
+                elif action=='roster-import':
+                    from annual_roster import import_records
+                    result=import_records(doc)
+                elif action=='roster-preview':
+                    from annual_roster import proposal
+                    result=proposal(doc['document'])
+                elif action=='roster-apply':
+                    from annual_roster import apply
+                    weekly.validate(doc['document'])
+                    result=weekly.preview(apply(doc['document'],doc.get('expected')))
                 elif action in ('select-scripture','select-song'):
                     from catalog import apply_scripture,apply_song
                     weekly.validate(doc['document'])

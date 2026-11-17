@@ -46,3 +46,7 @@ python -m unittest discover -s apps/bulletin-editor -p test_siwc.py
 ```
 
 테스트는 자체 생성 서명과 가짜 응답만 사용하며 실제 계정이나 OpenAI 서버에 접속하지 않습니다. 실제 로그인은 사용자가 공식 브라우저 화면에서 완료합니다.
+
+## Hymn catalog and annual roster
+
+The hymn picker excludes gospel songs and navigates by hundreds and tens. A private CSV crosswalk in `system/찬송가_제목번호_대장.csv` provides Korean/Japanese first-line titles and matching book numbers. User hymn metadata, source scans and rosters are excluded from this release. Annual XLSX/UTF-8 CSV rosters match bulletin dates and the next two Sundays; missing assignments are reported. Sermon title translation uses the connected AI and never translates Bible text.

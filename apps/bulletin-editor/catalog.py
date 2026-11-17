@@ -26,13 +26,13 @@ def songs():
         number=int(number)
         if number not in hymns or entry.get('preferred'):
             hymns[number]={'id':f'hanil-{number:03}','kind':'hymn','number':number,'title':entry.get('title',''),'preferred':bool(entry.get('preferred'))}
-    result=[hymns[n] for n in sorted(hymns)]
-    seen=set()
-    for entry in index.get('gospelSongs',[]):
-        title=entry.get('title') or entry.get('firstLine')
-        if not title or title in seen:continue
-        seen.add(title);ident=hashlib.sha256(title.encode()).hexdigest()[:16]
-        result.append({'id':'gospel-'+ident,'kind':'gospel','title':title,'number':None})
+    from hymn_metadata import records,format_song
+    metadata=records();result=[hymns[n] for n in sorted(hymns)]
+    for song in result:
+        song.update(metadata.get(song['number'],{}))
+        if song.get('titleKo'):song['title']=song['titleKo']
+        song['bulletinText']=format_song(song)
+        song['metadataComplete']=bool(song.get('titleJa') and song.get('newKoreanStatus')!='확인 필요')
     return result
 
 def catalog():
@@ -114,5 +114,6 @@ def apply_song(document,data):
     selected=next((song for song in songs() if song['id']==data.get('id')),None)
     if selected is None:raise ValueError('승인 목록에서 곡을 선택해주세요.')
     if 'expectedTitle' in data and data['expectedTitle']!=selected['title']:raise ValueError('곡 목록이 바뀌었습니다. 다시 선택해주세요.')
-    text=f"韓日{selected['number']}章\n({selected['title']})" if selected['kind']=='hymn' else selected['title']
+    if 'expectedText' in data and data['expectedText']!=selected['bulletinText']:raise ValueError('찬송가 대장이 바뀌었습니다. 다시 선택해주세요.')
+    text=selected['bulletinText']
     return update_document(document,{f'service.{row}.detailRaw':text})
