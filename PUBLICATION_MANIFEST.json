@@ -1,0 +1,161 @@
+{
+  "repository": "https://github.com/kju3436/FG",
+  "license": "MIT",
+  "exclusions": [
+    "church documents",
+    "Bible data",
+    "hymns/music",
+    "PPT/templates",
+    "fonts",
+    "personal information",
+    "credentials",
+    "generated files"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "766b54fa6fa77c434cfaf32229c479f9171766508bc1ce2d8cdc6b8838b8b2cb",
+      "bytes": 225
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "19b2828db9642244bbe8970b50d3f4d064a023207cab44b12263045b012369de",
+      "bytes": 1385
+    },
+    {
+      "path": "README.md",
+      "sha256": "2e097bf4f8bfb3945b406a46af789777da0b9e7f5c79be267025945c486f222e",
+      "bytes": 4209
+    },
+    {
+      "path": "apps/bulletin-editor/LICENSE",
+      "sha256": "19b2828db9642244bbe8970b50d3f4d064a023207cab44b12263045b012369de",
+      "bytes": 1385
+    },
+    {
+      "path": "apps/bulletin-editor/additions.py",
+      "sha256": "e8d595c5aa7428bfe9140247cc3abc1870423e22a4afa72144d05b51e9a7d68d",
+      "bytes": 11770
+    },
+    {
+      "path": "apps/bulletin-editor/ai_client.py",
+      "sha256": "a5ea5ad34d3dd39cd7b0ad62b015257006bbd9538e7f763b36a7292d42143901",
+      "bytes": 11711
+    },
+    {
+      "path": "apps/bulletin-editor/ai_review.py",
+      "sha256": "5aa35ddd5a238cd83d5c4733325045f218086a0e9435c4de4ee2148dead9a839",
+      "bytes": 11870
+    },
+    {
+      "path": "apps/bulletin-editor/chatgpt_eligibility.py",
+      "sha256": "fbc88c04258e6ff35239bd4f322021d76affc1363e7401c26a179733d0a2efe7",
+      "bytes": 810
+    },
+    {
+      "path": "apps/bulletin-editor/compose.py",
+      "sha256": "8b789d49f3dabdd7894aa3df6876ff4fdad55db948560f9d3d100b8dda7f7ee7",
+      "bytes": 14449
+    },
+    {
+      "path": "apps/bulletin-editor/embedded_fonts.py",
+      "sha256": "56ff4de6c6ff18d9db1abde4bc2e34954a4bf7c22ecce281c4e3f935a0436127",
+      "bytes": 14071
+    },
+    {
+      "path": "apps/bulletin-editor/import_scripture.py",
+      "sha256": "d64666576f1b1b8cbe48b6f10285dccfb59b033c60480152d42f84d7c808801a",
+      "bytes": 2781
+    },
+    {
+      "path": "apps/bulletin-editor/native_template.py",
+      "sha256": "57482e252db398c77aa9a1e3d1423fe875f4030d4d0475d517876ddf12788825",
+      "bytes": 52350
+    },
+    {
+      "path": "apps/bulletin-editor/partial.py",
+      "sha256": "3b2da7255972defda1d81e992861fc8fe5e236fa343c2a1ae96a3af38bd8f468",
+      "bytes": 12106
+    },
+    {
+      "path": "apps/bulletin-editor/reflow.py",
+      "sha256": "634cd7f2435d3a29a156606be66efd5c9488b11f8ddef6d5ca2fa928ca6c8947",
+      "bytes": 10967
+    },
+    {
+      "path": "apps/bulletin-editor/requirements.txt",
+      "sha256": "3fbc04baed8843ebc37457c3c8350e36afcd9a2bd8cbf34dc87a6c3490f6402c",
+      "bytes": 124
+    },
+    {
+      "path": "apps/bulletin-editor/scripture.py",
+      "sha256": "938031f0d782a3467322b2743d15c72050d12c8f715f893c656d0b6eb073a65f",
+      "bytes": 11361
+    },
+    {
+      "path": "apps/bulletin-editor/server.py",
+      "sha256": "b8bde67e441dbfa3db4d185109d16801c9b7c494f6540ac047e782f174573999",
+      "bytes": 24664
+    },
+    {
+      "path": "apps/bulletin-editor/siwc.py",
+      "sha256": "abb06d1674f2042125007700ff7049250de8c1de51d89b83931e7f63377cd464",
+      "bytes": 19718
+    },
+    {
+      "path": "apps/bulletin-editor/test_ai_client.py",
+      "sha256": "89fd5036f47595f28816c5c061d9cf0cfdd3b814c799686549b3cfc72c434387",
+      "bytes": 3901
+    },
+    {
+      "path": "apps/bulletin-editor/test_siwc.py",
+      "sha256": "2ac273878cd3b002de0e0cf820c9d12420e4a61c62aa8c231f583eb86ad65651",
+      "bytes": 8311
+    },
+    {
+      "path": "apps/bulletin-editor/web/index.html",
+      "sha256": "b70191aa08d3000d9c3911d3937d5e346159e103f3cdf2d464d93b14ac3fd1a5",
+      "bytes": 14634
+    },
+    {
+      "path": "apps/bulletin-editor/web/weekly.css",
+      "sha256": "8fae7b9d44e28c2f2209401b129d495d898c89f12888a67013e8f48b633eec73",
+      "bytes": 14654
+    },
+    {
+      "path": "apps/bulletin-editor/web/weekly.html",
+      "sha256": "b70191aa08d3000d9c3911d3937d5e346159e103f3cdf2d464d93b14ac3fd1a5",
+      "bytes": 14634
+    },
+    {
+      "path": "apps/bulletin-editor/web/weekly.js",
+      "sha256": "aebf368ba7136df0f8a4614bd3520ea6c997876257dead3423032d54668f7091",
+      "bytes": 32718
+    },
+    {
+      "path": "apps/bulletin-editor/weekly.py",
+      "sha256": "592fe77c90cc1decaff3a4385f6e4e716e7417c8c7e5a2cd91dbec4fdab9a729",
+      "bytes": 4514
+    },
+    {
+      "path": "apps/bulletin-editor/worship.py",
+      "sha256": "1da53eb316e9d10892828365ab3202756ac9266d010c6e89424f00a64a5a1367",
+      "bytes": 50036
+    },
+    {
+      "path": "system/scripture-official-sources.json",
+      "sha256": "969317b33d6a92962fa51887adb30932497aa813f0428557c156c52b4d80d542",
+      "bytes": 72
+    },
+    {
+      "path": "system/scripture-provider.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "bytes": 3
+    },
+    {
+      "path": "system/siwc-eligibility.json",
+      "sha256": "45c1d802fe549df4799764723874084445e77a7dad3f2bd20c340789c0e7ebd6",
+      "bytes": 316
+    }
+  ]
+}

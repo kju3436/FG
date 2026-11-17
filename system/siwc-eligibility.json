@@ -1,0 +1,8 @@
+{
+  "status": "open_source_published",
+  "sourceUrl": "https://github.com/kju3436/FG",
+  "licenseFile": "apps/bulletin-editor/LICENSE",
+  "clientId": "",
+  "approvalReference": "",
+  "note": "Source-only MIT release. User documents and credentials are not distributed. Account entitlement is verified at sign-in."
+}

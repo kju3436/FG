@@ -1,0 +1,17 @@
+output/
+tmp/
+.build/
+資料/
+자료/
+*.pdf
+*.pptx
+*.ttf
+*.ttc
+*.otf
+.env*
+**/__pycache__/
+**/vendor/
+system/*-index.json
+찬송가_자막_라이브러리/
+복음성가_자막_라이브러리/
+통합예배PPT_라이브러리/
