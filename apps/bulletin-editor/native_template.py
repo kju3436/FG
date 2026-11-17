@@ -604,7 +604,7 @@ def _canonical_fields(data, pages):
                 # Superscript 9 may be mid-line in the Korean source column.
                 line=re.sub(r'(?<=[가-힣。요])\s+(9)(?=\s*만일)',r'\n\1 ',line)
                 for part in line.splitlines():
-                    m=re.match(r'^\s*(\d{1,2})[.．]?\s*(.*)$',part)
+                    m=re.match(r'^\s*(\d{1,3})[.．]?\s*(.*)$',part)
                     if m:
                         lines.append(m[1]+' '+m[2].strip())
                     elif lines:
