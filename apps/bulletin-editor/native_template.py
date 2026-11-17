@@ -565,11 +565,14 @@ def _canonical_fields(data, pages):
         row['detailKo']=''.join(kp).strip('… \n')
         if i in (1,2) and not row['detailKo']:
             # Structured bilingual reference, not an invented printed paragraph.
-            match=re.fullmatch(r'詩篇\s*(\d+:\d+)',row['detailJa'])
-            if match:
-                row['detailKo']='시편 '+match[1]
+            import scripture
+            try:
+                ref=scripture.parse_reference(row['detailJa']);index=scripture.IDS.index(ref['book'])
+                suffix=re.search(r'\d.*$',row['detailJa'])[0]
+                row['detailKo']=scripture.KO[index]+' '+suffix
                 row['derivedFields']={'detailKo':{'from':f'service.{i}.detailJa',
-                                               'transform':'canonical-book-name:詩篇=시편', 'printed':False}}
+                                               'transform':'canonical-book-name', 'printed':False}}
+            except (ValueError,TypeError,IndexError):row.pop('derivedFields',None)
         alias(detail,f'service.{i}.detailJa',jp)
         alias(detail,f'service.{i}.detailKo',kp)
         # Distinct numbering systems must not be conflated by PPT hymn lookup.

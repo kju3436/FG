@@ -95,6 +95,13 @@ def same_reference(a,b):
 def apply_scripture(document,data):
     from native_template import update_document
     kind=data.get('kind')
+    if kind=='call':
+        value=preview(data)
+        if 'expectedKo' in data and value['ko']!=data['expectedKo']:raise ValueError('성경 데이터가 바뀌었습니다. 구절을 다시 확인해주세요.')
+        rows=document['serviceData'].get('service',[])
+        row=next((i for i,r in enumerate(rows) if str(r.get('ko','')).replace(' ','')=='예배로의부르심'),None)
+        if row is None:raise ValueError('예배로의 부르심 영역을 찾지 못했습니다.')
+        return update_document(document,{f'service.{row}.detailRaw':'…………………… '+value['refJa']+' ……………………'})
     if kind not in ('sermon','absolution'):raise ValueError('적용할 말씀 항목을 선택해주세요.')
     value=preview(data);existing=document['serviceData']['scripture'][kind]
     if 'expectedKo' in data and value['ko']!=data['expectedKo']:raise ValueError('성경 데이터가 바뀌었습니다. 본문을 다시 확인해주세요.')
