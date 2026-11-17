@@ -282,7 +282,7 @@ class Handler(SimpleHTTPRequestHandler):
                 from native_template import update_document,edit_block,render_document
                 action=self.path.rsplit('/',1)[-1]
                 if action=='load':result=weekly.load_archive(doc.get('id',''))
-                elif action=='validate':weekly.validate(doc['document']);result={'valid':True}
+                elif action=='validate':weekly.validate(doc['document']);result={'valid':True,'document':weekly.preview(doc['document'])}
                 elif action=='save':result=weekly.save_current(doc['document'])
                 elif action=='archive':result=weekly.archive(doc['document'])
                 elif action=='next':

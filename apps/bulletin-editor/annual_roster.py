@@ -117,6 +117,9 @@ def apply(document,expected=None):
     if expected and plan['fingerprint']!=expected:raise ValueError('대장 또는 날짜가 바뀌었습니다. 다시 확인해주세요.')
     result=update_document(document,plan['changes']);registry={f['id']:f for f in result['fonts']}
     if plan['roster']:
+        import pdfplumber
+        from native_template import _source,_block,_in,_map_runs,_layout_spec
+        with pdfplumber.open(_source()) as pdf:template_chars=pdf.pages[3].chars
         page=result['pages'][3];source=next((b for b in page['blocks'] if b.get('binding')=='rosterRaw.0'),None) or next((b for b in page['blocks'] if b['id'].startswith('annual-roster-')),None)
         if source is None:raise ValueError('봉사표 기준 영역을 찾지 못했습니다.')
         page['blocks']=[b for b in page['blocks'] if b.get('binding') not in ('rosterRaw.0','rosterRaw.1') and not b['id'].startswith('annual-roster-')]
@@ -127,6 +130,11 @@ def apply(document,expected=None):
             if i%2==0:cells += [('date',36,47,top,51),('cleaning',428,163,top,51)]
             for key,x,w,y,h in cells:
                 b=copy.deepcopy(source);b.update(id=f'annual-roster-{i}-{key}',binding=f'roster.{i}.{key}',x=x,y=y,w=w,h=h,fieldBindings=[{'field':f'roster.{i}.{key}'}]);b.pop('previewGlyphs',None);b.pop('format',None)
+                selected=[c for c in template_chars if _in(c,(x,718,x+w,718+h))]
+                if selected:
+                    cell=_block(selected,b['id'],b['binding'],'roster',(x,718,x+w,718+h));cell['runs']=_map_runs(cell['runs'],registry)
+                    b['runs']=cell['runs'];b['text']=cell['text'];b['fit']=cell['fit'];b['fontSize']=cell['fontSize'];b['fontId']=cell['fontId']
+                b.pop('styleSeed',None);b['layoutSpec']={'align':'center','indent':0,'baselines':[]}
                 text=value[key]
                 if key=='cleaning' and r.get('cleaningDate'):
                     cd=datetime.date.fromisoformat(r['cleaningDate']);text+='\n'+f'{cd.month}/{cd.day}'

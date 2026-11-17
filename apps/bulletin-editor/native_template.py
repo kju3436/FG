@@ -135,6 +135,10 @@ def _map_runs(runs,registry):
             cursor=offset+len(glyph['text'])
             index=next(i for i,(a,b,_) in enumerate(segments) if a<=offset<b)
             new[index]['glyphs'].append(copy.deepcopy(glyph))
+        for item in new:
+            glyphs=[g for g in item['glyphs'] if not g['text'].isspace() and g.get('w',0)>0]
+            natural=sum(_width(registry[item['fontId']],g['text'],item['fontSize']) for g in glyphs)
+            if natural:item['widthScale']=max(.65,min(1.25,sum(g['w'] for g in glyphs)/natural))
         result.extend(new)
     return result
 
@@ -831,6 +835,7 @@ def _style_chars(block):
 def _replace(block, text, registry):
     if not isinstance(text, str) or len(text) > 30000:
         raise ValueError('Text must be a string of at most 30000 characters.')
+    if not block.get('layoutSpec'):block['layoutSpec']=_layout_spec(block)
     if text == block['text']:
         return
     if not block.get('styleSeed'):
@@ -859,30 +864,74 @@ def _replace(block, text, registry):
     _layout(block, registry)  # Throws on overflow; caller mutates only a copy.
 
 
+def _layout_spec(block):
+    """Measured line origins and alignment; no generic left alignment."""
+    glyphs=[g for r in block.get('runs',[]) for g in r.get('glyphs',[]) if not g['text'].isspace()]
+    lines=[]
+    for g in sorted(glyphs,key=lambda g:(g['baseline'],g['x'])):
+        line=next((l for l in lines if abs(l['baseline']-g['baseline'])<2),None)
+        if line is None:line={'baseline':g['baseline'],'glyphs':[]};lines.append(line)
+        line['glyphs'].append(g)
+    if not lines:return {'align':block.get('align','left'),'indent':0,'baselines':[]}
+    lefts=[min(g['x'] for g in l['glyphs']) for l in lines];rights=[max(g['x']+g.get('w',0) for g in l['glyphs']) for l in lines]
+    lg=min(lefts)-block['x'];rg=block['x']+block['w']-max(rights)
+    if len(lines)>1 and max(lefts)-min(lefts)<2:align='left';indent=max(0,min(lefts)-block['x'])
+    elif abs(lg-rg)<min(15,block['w']*.08):align='center';indent=0
+    elif rg<min(25,lg*.35):align='right';indent=max(0,rg)
+    else:align='left';indent=max(0,lg)
+    return {'align':align,'indent':indent,'baselines':[l['baseline']-block['y'] for l in lines]}
+
 def _layout(block, registry):
-    """Wrap with mapped face widths; original size down to min(original,12)."""
+    """Source alignment, calibrated advances and paragraph-aware line breaks."""
     preferred = block['fit']['preferredSize']; minimum = block['fit']['minimumSize']
+    spec=block.get('layoutSpec') or _layout_spec(block);block['layoutSpec']=spec
+    # Large silent font reductions are not an acceptable overflow solution.
+    minimum=max(minimum,preferred*.95)
     chars = [(ch, run) for run in block['runs'] for ch in run['text']]
+    if block.get('group')=='service':
+        # Keep the sample's explicit two-line cells; modest tracking adjustment
+        # precedes adding a third line or reducing the font height.
+        adjusted=[];paragraph=[]
+        def fit_paragraph(items):
+            extent=sum(_width(registry[r['fontId']],c,r['fontSize'])*r.get('widthScale',1) for c,r in items)
+            ratio=(block['w']-spec.get('indent',0))/extent if extent else 1
+            return [(c,dict(r,widthScale=r.get('widthScale',1)*ratio)) for c,r in items] if .8<=ratio<1 else items
+        for ch,run in chars:
+            if ch=='\n':adjusted.extend(fit_paragraph(paragraph));adjusted.append((ch,run));paragraph=[]
+            else:paragraph.append((ch,run))
+        adjusted.extend(fit_paragraph(paragraph));chars=adjusted
     sizes = [preferred - .5*i for i in range(int((preferred-minimum)*2)+1)]
     if not sizes or sizes[-1] > minimum:
         sizes.append(minimum)
     for target in sizes:
-        x = block['x']; y = block['y'] + target; output = []
-        leading = target * block.get('lineHeight', 1.2)
+        output=[];lines=[];line=[];bad=False;available=block['w']-spec.get('indent',0)
+        def width(items):return sum(_width(registry[r['fontId']],c,r['fontSize']*target/preferred)*r.get('widthScale',1) for c,r in items)
         for ch, run in chars:
-            size = run['fontSize'] * target/preferred
             if ch == '\n':
-                x = block['x']; y += leading; continue
-            width = _width(registry[run['fontId']],ch,size)
-            if width > block['w'] + .001:
-                break
-            if x > block['x'] and x + width > block['x'] + block['w'] + .001:
-                x = block['x']; y += leading
-            output.append((ch, x, y, size, run)); x += width
-        else:
-            if y <= block['y'] + block['h'] + .001:
-                block['fitSize'] = target
-                return output
+                lines.append(line);line=[];continue
+            if width([(ch,run)])>available+.001:bad=True;break
+            if line and width(line+[(ch,run)])>available+.001:
+                spaces=[i for i,(c,_) in enumerate(line) if c.isspace()]
+                if spaces and re.search('[가-힣A-Za-z]',''.join(c for c,_ in line)):
+                    at=spaces[-1];lines.append(line[:at]);line=line[at+1:]
+                elif ch in '、。，．！？）」』】)]' and len(line)>1:
+                    last=line.pop();lines.append(line);line=[last]
+                else:lines.append(line);line=[]
+                if ch.isspace() and not line:continue
+            line.append((ch,run))
+        if bad:continue
+        lines.append(line);baselines=spec.get('baselines',[]);leading=(sum(b-a for a,b in zip(baselines,baselines[1:]))/(len(baselines)-1) if len(baselines)>1 else preferred*block.get('lineHeight',1.2))*target/preferred
+        offsets=[v*target/preferred for v in baselines] if len(lines)==len(baselines) else []
+        if not offsets:
+            total=target+(len(lines)-1)*leading;first=max(target*.85,(block['h']-total)/2+target*.85);offsets=[first+i*leading for i in range(len(lines))]
+        if not offsets or offsets[-1]>block['h']+.001:continue
+        for items,offset in zip(lines,offsets):
+            extent=width(items);align=spec.get('align','left');indent=spec.get('indent',0)
+            x=block['x']+(block['w']-extent)/2 if align=='center' else block['x']+block['w']-indent-extent if align=='right' else block['x']+indent
+            if extent>available+.001:bad=True;break
+            for ch,run in items:
+                size=run['fontSize']*target/preferred;output.append((ch,x,block['y']+offset,size,run));x+=_width(registry[run['fontId']],ch,size)*run.get('widthScale',1)
+        if not bad:block['fitSize']=target;return output
     raise ValueError(f"글이 영역을 넘습니다. 내용을 줄이거나 영역을 넓혀주세요. (최소 {minimum:g}pt)")
 
 
@@ -936,12 +985,15 @@ def update_document(doc, changes):
                     if at<0:raise ValueError('Stale segmented binding: '+field)
                     positions.append((at,at+len(segment)));cursor=at+len(segment)
                 display=b['text']
+                inserted=value
+                if value and segments and segments[0].endswith('\n') and not value.endswith('\n'):
+                    inserted+='\n'
                 if positions:
                     for i,(start,end) in reversed(list(enumerate(positions))):
-                        display=display[:start]+(value if i==0 else '')+display[end:]
+                        display=display[:start]+(inserted if i==0 else '')+display[end:]
                 elif value:
                     display=display+('\n' if display and not display.endswith('\n') else '')+value
-                _replace(b,display,registry);descriptor['segments']=[value] if value else []
+                _replace(b,display,registry);descriptor['segments']=[inserted] if value else []
                 _set(result['serviceData'],b['binding'],display)
                 continue
             if 'substring' in descriptor:
@@ -984,16 +1036,21 @@ def native_text_layer(block, registry):
     if isinstance(registry, list):
         registry = {f['id']: f for f in registry}
     mem = io.BytesIO(); c = canvas.Canvas(mem, pagesize=(W, H))
+    def draw(text,x,y,size,run,advance):
+        font=registry[run['fontId']];natural=_width(font,text,size)
+        c.saveState();c.translate(x,H-y)
+        if natural and advance:c.scale(advance/natural,1)
+        _draw(c,font,text,0,0,size,run['color']);c.restoreState()
     for run in block['runs']:
         _check_run(run,registry,block.get('positioned',False))
     if block.get('positioned'):
         for run in block['runs']:
             for glyph in run['glyphs']:
                 if glyph['text'].isspace():continue
-                _draw(c,registry[run['fontId']],glyph['text'],glyph['x'],H-glyph['baseline'],run['fontSize'],run['color'])
+                draw(glyph['text'],glyph['x'],glyph['baseline'],run['fontSize'],run,glyph.get('w'))
     else:
         for ch, x, y, size, run in _layout(block, registry):
-            _draw(c,registry[run['fontId']],ch,x,H-y,size,run['color'])
+            draw(ch,x,y,size,run,_width(registry[run['fontId']],ch,size)*run.get('widthScale',1))
     c.save()
     return PdfReader(io.BytesIO(mem.getvalue())).pages[0]
 

@@ -18,10 +18,12 @@ def validate(document):
     from native_template import validate_document
     if not isinstance(document,dict) or document.get('engine')!='native-v2':raise ValueError('우리 교회 4페이지 주보 작업 파일을 선택해주세요.')
     validate_document(document)
+    repair_layout(document)
 
 def preview(document):
     """Use the renderer's glyph positions for exact browser/PDF line agreement."""
-    from native_template import _layout,_friendly_label
+    from native_template import _layout,_friendly_label,_width
+    repair_layout(document)
     registry={f['id']:f for f in document['fonts']}
     for page in document['pages']:
         for b in page['blocks']:
@@ -29,7 +31,38 @@ def preview(document):
             if not b.get('styleSeed') and b.get('runs'):
                 b['styleSeed']=[{k:copy.deepcopy(v) for k,v in r.items() if k!='glyphs'} for r in b['runs']]
             if b.get('positioned') is False:
-                b['previewGlyphs']=[{'text':ch,'x':x,'baseline':y,'fontSize':size,'fontId':run['fontId'],'color':run['color']} for ch,x,y,size,run in _layout(b,registry)]
+                b['previewGlyphs']=[{'text':ch,'x':x,'baseline':y,'w':_width(registry[run['fontId']],ch,size)*run.get('widthScale',1),'fontSize':size,'fontId':run['fontId'],'color':run['color']} for ch,x,y,size,run in _layout(b,registry)]
+    return document
+
+def repair_layout(document):
+    """Upgrade old work without replacing its content with sample content."""
+    if document.get('printLayoutVersion')==2:return document
+    from native_template import native_template_document,_layout_spec,_map_runs,_canonical_fields,_set
+    base=native_template_document();references={b['binding']:b for p in base['pages'] for b in p['blocks']}
+    registry={f['id']:f for f in document['fonts']}
+    for page in document['pages']:
+        for b in page['blocks']:
+            ref=references.get(b.get('binding'))
+            b['runs']=_map_runs(b['runs'],registry)
+            if ref:
+                for run in b['runs']:
+                    if not run.get('glyphs') and 'widthScale' not in run:
+                        peers=[r for r in ref['runs'] if r['fontId']==run['fontId'] and r.get('widthScale')]
+                        if peers:run['widthScale']=sum(r['widthScale']*len(r['text']) for r in peers)/sum(len(r['text']) for r in peers)
+            if ref and not b.get('layoutSpec'):b['layoutSpec']=_layout_spec(ref)
+            if ref and re.fullmatch(r'service\.\d+\.detailRaw',b.get('binding','')):
+                lines=ref['text'].splitlines()
+                if len(lines)>1 and not re.search('[가-힣]',lines[0]) and re.search('[가-힣]',b['text']) and '\n' not in b['text']:
+                    from native_template import _replace
+                    at=re.search('[가-힣]',b['text']).start()
+                    _replace(b,b['text'][:at].rstrip()+'\n'+b['text'][at:],registry)
+                    _set(document['serviceData'],b['binding'],b['text'])
+    if document['serviceData'].get('communion',{}).get('enabled'):
+        import communion
+        communion.measured_page(document)
+    _canonical_fields(document['serviceData'],document['pages'])
+    document['fieldBindings']=[dict(a,blockId=b['id'],group=b['group']) for p in document['pages'] for b in p['blocks'] for a in b.get('fieldBindings',[])]
+    document['printLayoutVersion']=2
     return document
 
 def _write(path,document):

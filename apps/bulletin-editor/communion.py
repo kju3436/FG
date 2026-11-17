@@ -21,6 +21,43 @@ def automatic(document):
     current=document['serviceData'].get('communion',{});date=document['serviceData']['date']
     if current.get('date')==date:return document
     return apply(document,suggested(date),manual=False)
+
+def measured_page(document):
+    """Use the actual communion PDF's fonts, baselines and alignment."""
+    import pdfplumber
+    from native_template import _block,_in,_registry,_map_runs,_replace,_layout_spec
+    page=document['pages'][1];registry={f['id']:f for f in document['fonts']}
+    source=next((ROOT/'자료'/'주보_기준원본').glob('20261101*.pdf'))
+    with pdfplumber.open(source) as pdf:chars=pdf.pages[1].chars
+    for font in _registry({c['fontname'] for c in chars}):
+        fid=font['id']
+        if fid not in registry:registry[fid]=font;document['fonts'].append(font)
+    for index,old in enumerate(page['blocks']):
+        binding=old.get('binding','');box=None
+        if binding.startswith('service.'):
+            _,row,key=binding.split('.');top,bottom=BOUNDS[int(row)]
+            left,right={'nameRaw':(1.92,158.4),'detailRaw':(158.4,455.76),'leader':(455.76,593.4)}[key];box=(left,top,right,bottom)
+        elif binding.startswith('communion.'):
+            left,right={'nameRaw':(1.92,158.4),'detailRaw':(158.4,455.76),'leader':(455.76,593.4)}[binding.split('.')[1]];box=(left,521,right,565)
+        elif binding=='serviceTitleJa':box=(0,0,310,44)
+        elif binding=='preacher':box=(310,0,595,25)
+        elif binding=='interpreters':box=(310,25,595,44)
+        elif binding.startswith('nativeText.'):
+            targets=[(50.3,44.5),(146.5,129.46),(403.7,375.34),(574.1,565.78),(809.9,802.78),(826.8,819.7)]
+            target=min(targets,key=lambda v:min(abs(old['y']-v[0]),abs(old['y']-v[1])))
+            if min(abs(old['y']-target[0]),abs(old['y']-target[1]))<5:box=(0,target[1]-1,595,target[1]+15)
+        if box is None:continue
+        selected=[c for c in chars if _in(c,box)]
+        if not selected:continue
+        fresh=_block(selected,old['id'],binding,old['group'],box if not binding.startswith('nativeText.') else None)
+        fresh['runs']=_map_runs(fresh['runs'],registry);fresh['layoutSpec']=_layout_spec(fresh)
+        fresh['fieldBindings']=copy.deepcopy(old.get('fieldBindings',[]))
+        if fresh['text']!=old['text']:
+            # Transfer geometry only: a different week's title must retain its own sizes.
+            fresh['text']=old['text'];fresh['runs']=copy.deepcopy(old['runs']);fresh['fit']=copy.deepcopy(old['fit']);fresh['positioned']=False
+        page['blocks'][index]=fresh
+    document['communionLayoutVersion']=2
+    return document
 def apply(document,enabled,manual=True):
     from native_template import _replace,_canonical_fields,_set,validate_document
     if type(enabled)is not bool:raise ValueError('성찬식 있음 또는 없음을 선택해주세요.')
@@ -42,7 +79,7 @@ def apply(document,enabled,manual=True):
         for suffix,text,x,w in [('nameRaw','聖餐式 성찬식',1.92,156.48),('detailRaw','コリント人への手紙 第一 11:23-29\n韓日285章',158.4,297.36),('leader','一同 다같이',455.76,137.64)]:
             source=next(b for b in page['blocks'] if b['binding']=='service.11.'+suffix);b=copy.deepcopy(source)
             b.update(id='communion-'+suffix,binding='communion.'+suffix,x=x,y=521,w=w,h=44,positioned=False,fieldBindings=[{'field':'communion.'+suffix}]);b.pop('previewGlyphs',None)
-            _replace(b,text,registry);page['blocks'].append(b)
+            b['text']=text;b['runs']=[dict(b['runs'][0],text=text,glyphs=[])];b.pop('layoutSpec',None);page['blocks'].append(b)
             old[suffix]=text
         title=next(b for b in page['blocks'] if b['binding']=='serviceTitleJa');_replace(title,'聖 餐 礼 拝',registry);data['serviceTitleJa']=title['text'];data['serviceTitleKo']='성찬예배';page['backgroundData']=background()
     elif not same:
@@ -55,6 +92,8 @@ def apply(document,enabled,manual=True):
                 b['fieldBindings']=copy.deepcopy(changed.get('fieldBindings',[]));_replace(b,changed['text'],registry)
         existing={b['id'] for b in restored['blocks']};restored['blocks'].extend(copy.deepcopy(b) for b in page['blocks'] if b['id'] not in existing and not b['id'].startswith('communion-'))
         result['pages'][1]=page=restored;title=next(b for b in page['blocks'] if b['binding']=='serviceTitleJa');data['serviceTitleJa']=title['text'];data['serviceTitleKo']='주일예배';result.pop('communionNormalPage',None)
+    if enabled:measured_page(result)
     data['communion']=dict(old,enabled=enabled,date=data['date'],manual=manual,firstSunday=suggested(data['date']))
     _canonical_fields(data,result['pages']);result['fieldBindings']=[dict(a,blockId=b['id'],group=b['group']) for p in result['pages'] for b in p['blocks'] for a in b.get('fieldBindings',[])]
     validate_document(result);return result
+

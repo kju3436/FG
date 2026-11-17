@@ -49,8 +49,8 @@
     },
     {
       "path": "apps/bulletin-editor/annual_roster.py",
-      "sha256": "7259164bfd72180d147c07d9a10b53408f8f5dde80e706fa2a9038fec22a1b0f",
-      "bytes": 11715
+      "sha256": "e2d786014d05edaf2ca6cdc38ff19c79899a999bcb1e8a8c5823f239f168d4dd",
+      "bytes": 12392
     },
     {
       "path": "apps/bulletin-editor/catalog.py",
@@ -64,8 +64,8 @@
     },
     {
       "path": "apps/bulletin-editor/communion.py",
-      "sha256": "92e21e319eb148e5d446e3108cb64e57c9b7f6a3470025073bda642973ccceb0",
-      "bytes": 5126
+      "sha256": "20e18444750d643af20b97c43fb044253e7c5eb03f0d1ac8e906c1c2d014c6ee",
+      "bytes": 7643
     },
     {
       "path": "apps/bulletin-editor/compose.py",
@@ -89,8 +89,8 @@
     },
     {
       "path": "apps/bulletin-editor/native_template.py",
-      "sha256": "ce8f31693a65fa803272dadf2a17efa9b21285dd26deefdd780bed0378f709e4",
-      "bytes": 52584
+      "sha256": "8aa832d291a7a1d7ef2eea8a5e152d0f6f7c656534a2b533f158823804c498e1",
+      "bytes": 56963
     },
     {
       "path": "apps/bulletin-editor/partial.py",
@@ -114,8 +114,8 @@
     },
     {
       "path": "apps/bulletin-editor/server.py",
-      "sha256": "044bfa3aab6ccd3c183b3a9cf1676803e33a03692ec1c30eb4f62d8064cae80c",
-      "bytes": 27923
+      "sha256": "4ff777e653e06772911544c0e4f0f9f2966116b68a0ebc194b1794ed78ff1624",
+      "bytes": 27966
     },
     {
       "path": "apps/bulletin-editor/siwc.py",
@@ -154,13 +154,13 @@
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "f3aaadaaaa100f5b0e80042b7ee41e2224b0153349de7e2a01e1b396d3482472",
-      "bytes": 52296
+      "sha256": "6f64d7ba8ff790373c8f6ad3d1cc04ba4bdc11186ace792601a9847ed76e9e86",
+      "bytes": 52422
     },
     {
       "path": "apps/bulletin-editor/weekly.py",
-      "sha256": "592fe77c90cc1decaff3a4385f6e4e716e7417c8c7e5a2cd91dbec4fdab9a729",
-      "bytes": 4514
+      "sha256": "ecfbee7c435e623e5c485b5124d9b0a59424f3e55e155bb613e3c8129672c4e9",
+      "bytes": 6664
     },
     {
       "path": "apps/bulletin-editor/worship.py",
