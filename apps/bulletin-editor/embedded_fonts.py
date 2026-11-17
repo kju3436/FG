@@ -280,7 +280,7 @@ def measure(name, text, size):
     return sum(face[2][c] for c in text) * size / face[0]['head'].unitsPerEm
 
 
-def draw(canvas, name, text, x, baseline, size):
+def draw(canvas, name, text, x, baseline, size, stroke_width=0):
     """Draw original outlines at a PDF bottom-left baseline, including CID CFF.
 
     Validate the whole string before touching the canvas. No silent .notdef and
@@ -302,10 +302,12 @@ def draw(canvas, name, text, x, baseline, size):
     canvas.saveState()
     try:
         canvas.translate(x, baseline); canvas.scale(scale, scale)
+        if stroke_width:
+            canvas.setStrokeColor(canvas._fillColorObj);canvas.setLineWidth(stroke_width/scale)
         for char in text:
             pen = CanvasPen(glyphs); pen.path = canvas.beginPath()
             glyphs[cmap[ord(char)]].draw(pen)
-            canvas.drawPath(pen.path, stroke=0, fill=1)
+            canvas.drawPath(pen.path, stroke=bool(stroke_width), fill=1)
             canvas.translate(widths[char], 0)
     finally:
         canvas.restoreState()

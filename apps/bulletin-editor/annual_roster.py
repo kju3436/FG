@@ -116,6 +116,11 @@ def apply(document,expected=None):
     plan=proposal(document)
     if expected and plan['fingerprint']!=expected:raise ValueError('대장 또는 날짜가 바뀌었습니다. 다시 확인해주세요.')
     result=update_document(document,plan['changes']);registry={f['id']:f for f in result['fonts']}
+    if plan['roster'] and result.get('layoutProfile')=='communion-20261101-v3':
+        from print_profile import replace_roster
+        replace_roster(result,plan['roster'])
+        result['annualRoster']={'date':plan['date'],'fingerprint':plan['fingerprint'],'warnings':plan['warnings'],'years':plan['years']}
+        validate_document(result);return result
     if plan['roster']:
         import pdfplumber
         from native_template import _source,_block,_in,_map_runs,_layout_spec

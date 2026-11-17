@@ -106,7 +106,8 @@ def _map_runs(runs,registry):
     """Choose a complete installed face per character, shared by HTML/PDF."""
     result=[]
     def supports(entry,ch):
-        return ch in '\n\r\t' or ord(ch) in _register(entry).face.charToGlyph
+        provider=_provider(entry)
+        return ch.isspace() or (provider.has_glyph(entry,ch) if provider else ord(ch) in _register(entry).face.charToGlyph)
     for run in runs:
         source=registry[run['fontId']];segments=[];start=0
         for i,ch in enumerate(run['text']):
@@ -144,6 +145,9 @@ def _map_runs(runs,registry):
 
 
 def _provider(entry):
+    if entry.get('backend')=='reference-subset':
+        from print_profile import provider
+        return provider()
     if entry.get('backend')=='embedded':
         if _FONT_BACKEND is None:
             raise ValueError('Embedded font backend is not attached.')
@@ -415,9 +419,10 @@ def _runs(chars):
     for row in _char_lines(chars):
         previous = None
         for ch in row:
-            style = (_font_id(ch['fontname']), round(ch['size'], 4), _color(ch.get('non_stroking_color')))
+            style = (_font_id(ch['fontname']), round(ch['size'], 4), _color(ch.get('non_stroking_color')),ch.get('sourceRenderMode',0),ch.get('sourceStrokeWidth',0))
             if not runs or runs[-1]['_key'] != style or previous is None:
                 runs.append({'text': '', 'fontId': style[0], 'fontSize': style[1], 'color': style[2],
+                             'sourceRenderMode':style[3],'sourceStrokeWidth':style[4],
                              'sourceFont': _font_name(ch['fontname']), 'bold': bool(re.search('Bold|W6|ExtraBold', ch['fontname'])),
                              'italic': bool(re.search('Italic|Oblique', ch['fontname'])), 'glyphs': [], '_key': style})
             gap = ch['x0'] - previous['x1'] if previous else 0
@@ -439,6 +444,11 @@ def _runs(chars):
 
 
 def _friendly_label(field,group,text):
+    if field=='rosterMonth':return '봉사표 월'
+    if re.fullmatch(r'roster\.\d+\.[A-Za-z]+',field):
+        _,index,key=field.split('.');i=int(index)
+        name={'date':'날짜','service':'예배','prayer':'봉헌기도','interpreter':'통역','cleaningDate':'청소일','cleaning':'청소 담당'}.get(key,'담당')
+        return ('다음 주' if i<2 else '다다음 주')+' '+str(i%2+1)+'부 '+name
     fixed={'date':'예배 날짜','issue':'주보 호수','serviceTitleJa':'예배 제목','serviceTitleKo':'예배 제목',
            'preacher':'설교자','interpreters':'통역자'}
     if field in fixed:return fixed[field]
@@ -792,6 +802,9 @@ def native_template_document():
 
 
 def font_bytes(fontId):
+    if fontId.startswith('reference-'):
+        from print_profile import font_bytes as reference_bytes
+        return reference_bytes(fontId)
     entries = _seed()['fontRegistry']
     if fontId not in entries:
         raise ValueError('Unknown native font ID.')
@@ -835,6 +848,10 @@ def _style_chars(block):
 def _replace(block, text, registry):
     if not isinstance(text, str) or len(text) > 30000:
         raise ValueError('Text must be a string of at most 30000 characters.')
+    if block.get('referenceRuns') and all(abs(a-b)<.001 for a,b in zip([block['x'],block['y'],block['x']+block['w'],block['y']+block['h']],block.get('sourceBounds',[]))) and re.sub(r'\s+','',text)==re.sub(r'\s+','',block['referenceText']):
+        block['text']=block['referenceText'];block['runs']=copy.deepcopy(block['referenceRuns']);block['positioned']=True
+        block.pop('previewGlyphs',None)
+        return
     if not block.get('layoutSpec'):block['layoutSpec']=_layout_spec(block)
     if text == block['text']:
         return
@@ -866,11 +883,12 @@ def _replace(block, text, registry):
 
 def _layout_spec(block):
     """Measured line origins and alignment; no generic left alignment."""
-    glyphs=[g for r in block.get('runs',[]) for g in r.get('glyphs',[]) if not g['text'].isspace()]
+    glyphs=[dict(g,size=r['fontSize']) for r in block.get('runs',[]) for g in r.get('glyphs',[]) if not g['text'].isspace()]
     lines=[]
     for g in sorted(glyphs,key=lambda g:(g['baseline'],g['x'])):
-        line=next((l for l in lines if abs(l['baseline']-g['baseline'])<2),None)
-        if line is None:line={'baseline':g['baseline'],'glyphs':[]};lines.append(line)
+        line=next((l for l in lines if abs(l['baseline']-g['baseline'])<max(6,max(l['size'],g['size'])*.6)),None)
+        if line is None:line={'baseline':g['baseline'],'size':g['size'],'glyphs':[]};lines.append(line)
+        elif g['size']>line['size']:line['baseline']=g['baseline'];line['size']=g['size']
         line['glyphs'].append(g)
     if not lines:return {'align':block.get('align','left'),'indent':0,'baselines':[]}
     lefts=[min(g['x'] for g in l['glyphs']) for l in lines];rights=[max(g['x']+g.get('w',0) for g in l['glyphs']) for l in lines]
@@ -1040,7 +1058,7 @@ def native_text_layer(block, registry):
         font=registry[run['fontId']];natural=_width(font,text,size)
         c.saveState();c.translate(x,H-y)
         if natural and advance:c.scale(advance/natural,1)
-        _draw(c,font,text,0,0,size,run['color']);c.restoreState()
+        _draw(c,dict(font,sourceRenderMode=run.get('sourceRenderMode',0),sourceStrokeWidth=run.get('sourceStrokeWidth',0)),text,0,0,size,run['color']);c.restoreState()
     for run in block['runs']:
         _check_run(run,registry,block.get('positioned',False))
     if block.get('positioned'):

@@ -88,6 +88,14 @@ def _warnings(document, index):
             warn('bounds', '영역이 페이지 밖에 있거나 크기가 올바르지 않습니다.')
         if b.get('type') != 'text':
             continue
+        if document.get('engine')=='native-v2':
+            # Approved positioned glyphs have already been measured. For edits,
+            # ask the same layout engine used by preview/PDF, not a CJK estimate.
+            if b.get('positioned') is False:
+                from native_template import _layout
+                try:_layout(b,{f['id']:f for f in document['fonts']})
+                except ValueError as exc:warn('overflow',str(exc))
+            continue
         size = _number(b.get('fontSize'), 15)
         pad = max(0, _number(b.get('padding'), 8))
         if size < 10:

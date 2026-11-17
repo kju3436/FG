@@ -25,18 +25,30 @@ def preview(document):
     from native_template import _layout,_friendly_label,_width
     repair_layout(document)
     registry={f['id']:f for f in document['fonts']}
+    document['glyphPaths']={}
     for page in document['pages']:
         for b in page['blocks']:
             b['label']=_friendly_label(b.get('binding',''),b.get('group',''),b.get('text',''))
             if not b.get('styleSeed') and b.get('runs'):
                 b['styleSeed']=[{k:copy.deepcopy(v) for k,v in r.items() if k!='glyphs'} for r in b['runs']]
             if b.get('positioned') is False:
-                b['previewGlyphs']=[{'text':ch,'x':x,'baseline':y,'w':_width(registry[run['fontId']],ch,size)*run.get('widthScale',1),'fontSize':size,'fontId':run['fontId'],'color':run['color']} for ch,x,y,size,run in _layout(b,registry)]
+                b['previewGlyphs']=[{'text':ch,'x':x,'baseline':y,'w':_width(registry[run['fontId']],ch,size)*run.get('widthScale',1),'fontSize':size,'fontId':run['fontId'],'color':run['color'],'sourceStrokeWidth':run.get('sourceStrokeWidth',0) if run.get('sourceRenderMode') in (1,2) else 0} for ch,x,y,size,run in _layout(b,registry)]
+            elif any(registry[r['fontId']].get('backend')=='reference-subset' for r in b['runs']):
+                b['previewGlyphs']=[dict(g,fontSize=r['fontSize'],fontId=r['fontId'],color=r['color'],sourceStrokeWidth=r.get('sourceStrokeWidth',0) if r.get('sourceRenderMode') in (1,2) else 0) for r in b['runs'] for g in r['glyphs']]
+            for g in b.get('previewGlyphs',[]):
+                f=registry[g['fontId']]
+                if f.get('backend')=='reference-subset' and not g['text'].isspace():
+                    from print_profile import glyph_path
+                    key=f['id']+':'+g['text'];document['glyphPaths'][key]=glyph_path(f['originalName'],g['text']);g['pathKey']=key
+                    g['advanceRatio']=g.get('w',0)/_width(f,g['text'],g['fontSize']) if _width(f,g['text'],g['fontSize']) else 1
     return document
 
 def repair_layout(document):
     """Upgrade old work without replacing its content with sample content."""
-    if document.get('printLayoutVersion')==2:return document
+    if document.get('serviceData',{}).get('date')=='2026-11-01' and document['serviceData'].get('communion',{}).get('enabled') and document.get('layoutProfile')!='communion-20261101-v3':
+        from print_profile import adopt
+        repaired=adopt(document);document.clear();document.update(repaired);return document
+    if document.get('printLayoutVersion') in (2,3):return document
     from native_template import native_template_document,_layout_spec,_map_runs,_canonical_fields,_set
     base=native_template_document();references={b['binding']:b for p in base['pages'] for b in p['blocks']}
     registry={f['id']:f for f in document['fonts']}
@@ -76,8 +88,9 @@ def initial():
     current=STATE/'current.json'
     if current.exists():
         try:
-            doc=json.loads(current.read_text(encoding='utf-8'));validate(doc);return preview(doc)
-        except (ValueError,OSError):pass
+            doc=json.loads(current.read_text(encoding='utf-8'))
+        except (ValueError,OSError) as exc:raise ValueError('보관된 작업 파일을 읽지 못했습니다. 기존 파일은 유지했습니다.') from exc
+        validate(doc);return preview(doc)
     return preview(native_template_document())
 
 def save_current(document):
@@ -97,6 +110,9 @@ def archives():
     return sorted(results,key=lambda d:(d['date'],d['savedAt']),reverse=True)
 
 def load_archive(identifier):
+    if identifier=='reference-20261101':
+        from print_profile import document
+        return preview(document())
     if identifier=='baseline':
         from native_template import native_template_document
         return preview(native_template_document())

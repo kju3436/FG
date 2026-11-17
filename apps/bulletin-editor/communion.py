@@ -24,6 +24,15 @@ def automatic(document):
 
 def measured_page(document):
     """Use the actual communion PDF's fonts, baselines and alignment."""
+    if document.get('layoutProfile')=='communion-20261101-v3':
+        from print_profile import document as reference_document
+        from native_template import _replace
+        old=document['pages'][1];page=reference_document()['pages'][1];registry={f['id']:f for f in document['fonts']}
+        current={b['binding']:b for b in old['blocks']}
+        for b in page['blocks']:
+            if b['binding'] in current and b['binding']!='serviceTitleJa':_replace(b,current[b['binding']]['text'],registry)
+        existing={b['id'] for b in page['blocks']};page['blocks'].extend(copy.deepcopy(b) for b in old['blocks'] if b['id'] not in existing and b.get('group')=='additions')
+        document['pages'][1]=page;return document
     import pdfplumber
     from native_template import _block,_in,_registry,_map_runs,_replace,_layout_spec
     page=document['pages'][1];registry={f['id']:f for f in document['fonts']}
