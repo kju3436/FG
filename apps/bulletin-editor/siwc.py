@@ -122,8 +122,8 @@ def status():
     with LOCK:
         try:data=_read();active=current()
         except ValueError:data={'accounts':{},'active':None};active=None
-        accounts=[{'id':aid,'label':(r.get('email') or 'ChatGPT 계정')+' · '+r['client_id'][-6:],
-                   'planEnabled':'chatgpt.tokens.use.direct' in r.get('scopes',[])} for aid,r in data['accounts'].items()]
+        accounts=[{'id':aid,'label':(r.get('email') or 'ChatGPT 계정')+' · 연결 '+str(i+1),
+                   'planEnabled':'chatgpt.tokens.use.direct' in r.get('scopes',[])} for i,(aid,r) in enumerate(data['accounts'].items())]
         progress=dict(PROGRESS)
     record=data['accounts'].get(data.get('active'),{})
     return {'eligibility':eligibility(),'connected':bool(active),'active':active,'accounts':accounts,'progress':progress,'showWelcome':bool(active and not record.get('welcomed')),'usageUrl':'https://chatgpt.com/settings/usage'}
