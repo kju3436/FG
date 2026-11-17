@@ -227,6 +227,9 @@ class Handler(SimpleHTTPRequestHandler):
                 import weekly
                 if path=='/api/weekly/current':return self.reply(json.dumps(weekly.initial(),ensure_ascii=False).encode())
                 if path=='/api/weekly/archives':return self.reply(json.dumps(weekly.archives(),ensure_ascii=False).encode())
+                if path=='/api/weekly/catalog':
+                    from catalog import catalog
+                    return self.reply(json.dumps(catalog(),ensure_ascii=False).encode())
                 if path.startswith('/api/weekly/background/'):
                     from native_template import background_bytes
                     return self.reply(background_bytes(int(path.rsplit('/',1)[-1])),'image/png')
@@ -275,6 +278,13 @@ class Handler(SimpleHTTPRequestHandler):
                 elif action=='next':result=weekly.preview(weekly.next_week(doc['document']))
                 elif action=='update':weekly.validate(doc['document']);result=weekly.preview(update_document(doc['document'],doc['changes']))
                 elif action=='edit':weekly.validate(doc['document']);result=weekly.preview(edit_block(doc['document'],doc['id'],doc['text']))
+                elif action=='scripture-preview':
+                    from catalog import preview
+                    result=preview(doc)
+                elif action in ('select-scripture','select-song'):
+                    from catalog import apply_scripture,apply_song
+                    weekly.validate(doc['document'])
+                    result=weekly.preview((apply_scripture if action=='select-scripture' else apply_song)(doc['document'],doc))
                 elif action=='addition-propose':
                     weekly.validate(doc['document'])
                     if doc.get('mode') in ('ai','whole','manual'):

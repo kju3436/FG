@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "2e097bf4f8bfb3945b406a46af789777da0b9e7f5c79be267025945c486f222e",
-      "bytes": 4209
+      "sha256": "d2bbef427770564e782016f7d8f9f48bdc01f1cc3503efee7066ab90ec034661",
+      "bytes": 4898
     },
     {
       "path": "apps/bulletin-editor/LICENSE",
@@ -46,6 +46,11 @@
       "path": "apps/bulletin-editor/ai_review.py",
       "sha256": "5aa35ddd5a238cd83d5c4733325045f218086a0e9435c4de4ee2148dead9a839",
       "bytes": 11870
+    },
+    {
+      "path": "apps/bulletin-editor/catalog.py",
+      "sha256": "5a07f068df0ab6290cb43f70b483ebbad6d23d89605a3324ce66db8d469eacc4",
+      "bytes": 7336
     },
     {
       "path": "apps/bulletin-editor/chatgpt_eligibility.py",
@@ -94,8 +99,8 @@
     },
     {
       "path": "apps/bulletin-editor/server.py",
-      "sha256": "b8bde67e441dbfa3db4d185109d16801c9b7c494f6540ac047e782f174573999",
-      "bytes": 24664
+      "sha256": "ff6eaac9b1c1e1537ae1a1bc00e7a4ca8e0769d38125afc5adbf5cd0c1b559fa",
+      "bytes": 25302
     },
     {
       "path": "apps/bulletin-editor/siwc.py",
@@ -114,23 +119,23 @@
     },
     {
       "path": "apps/bulletin-editor/web/index.html",
-      "sha256": "b70191aa08d3000d9c3911d3937d5e346159e103f3cdf2d464d93b14ac3fd1a5",
-      "bytes": 14634
+      "sha256": "51fa61bd63cf460fec721fcbef719b3285ae1e3e1bfb406203f35a4407667609",
+      "bytes": 17264
     },
     {
       "path": "apps/bulletin-editor/web/weekly.css",
-      "sha256": "8fae7b9d44e28c2f2209401b129d495d898c89f12888a67013e8f48b633eec73",
-      "bytes": 14654
+      "sha256": "0cb6e0f15c50746bf83cc5573718179608496cbbfd0f5690adb0f3dc67b36ee3",
+      "bytes": 16799
     },
     {
       "path": "apps/bulletin-editor/web/weekly.html",
-      "sha256": "b70191aa08d3000d9c3911d3937d5e346159e103f3cdf2d464d93b14ac3fd1a5",
-      "bytes": 14634
+      "sha256": "51fa61bd63cf460fec721fcbef719b3285ae1e3e1bfb406203f35a4407667609",
+      "bytes": 17264
     },
     {
       "path": "apps/bulletin-editor/web/weekly.js",
-      "sha256": "88860e1ee383709f347bea9c00445430c5b172d8000f97043b7a9a2426d5ffd0",
-      "bytes": 32958
+      "sha256": "0c441614a2f1fac4e2d858cb434477728421b67b5a0fb05a857fd0cf78fc7ff1",
+      "bytes": 42791
     },
     {
       "path": "apps/bulletin-editor/weekly.py",
